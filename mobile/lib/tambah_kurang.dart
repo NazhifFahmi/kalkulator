@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class MathOperationsPage extends StatefulWidget {
   const MathOperationsPage({super.key});
@@ -13,23 +15,24 @@ class _MathOperationsPageState extends State<MathOperationsPage> {
   String result = '';
 
   void calculate(bool isAddition) {
-    String num1Text = num1Controller.text.replaceAll(',', '.');
-    String num2Text = num2Controller.text.replaceAll(',', '.');
+    String num1Text = num1Controller.text
+        .replaceAll('.', '')
+        .replaceAll(',', '.');
+    String num2Text = num2Controller.text
+        .replaceAll('.', '')
+        .replaceAll(',', '.');
+
     double? num1 = double.tryParse(num1Text);
     double? num2 = double.tryParse(num2Text);
 
-    if (num1 == null || num2 == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Masukkan angka yang valid!'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
     setState(() {
-      result = isAddition ? 'Hasil: ${num1 + num2}' : 'Hasil: ${num1 - num2}';
+      if (num1 == null || num2 == null) {
+        result = '⚠️ Masukkan angka yang valid!';
+      } else {
+        double calculationResult = isAddition ? num1 + num2 : num1 - num2;
+        result =
+            'Hasil: ${NumberFormat('#,##0.###', 'id_ID').format(calculationResult)}';
+      }
     });
   }
 
@@ -38,7 +41,8 @@ class _MathOperationsPageState extends State<MathOperationsPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Penjumlahan & Pengurangan'),
-        backgroundColor: Colors.blueAccent,
+        backgroundColor: Color(0xFF56021F),
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
@@ -50,33 +54,31 @@ class _MathOperationsPageState extends State<MathOperationsPage> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color(0xFF56021F),
               ),
             ),
             SizedBox(height: 10),
             TextField(
               controller: num1Controller,
               keyboardType: TextInputType.number,
+              inputFormatters: [ThousandsSeparatorInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Angka 1',
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.looks_one),
-                filled: true,
-                fillColor: Color(0xFFFFC0EB),
+                prefixIcon: Icon(Icons.looks_one, color: Color(0xFF56021F)),
               ),
             ),
             SizedBox(height: 10),
             TextField(
               controller: num2Controller,
               keyboardType: TextInputType.number,
+              inputFormatters: [ThousandsSeparatorInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Angka 2',
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.looks_two),
-                filled: true,
-                fillColor: Color(0xFFFFC0EB),
+                prefixIcon: Icon(Icons.looks_one, color: Color(0xFF56021F)),
               ),
             ),
             SizedBox(height: 20),
@@ -85,19 +87,19 @@ class _MathOperationsPageState extends State<MathOperationsPage> {
               children: [
                 ElevatedButton.icon(
                   onPressed: () => calculate(true),
-                  icon: Icon(Icons.add),
+                  icon: Icon(Icons.add, color: Colors.white),
                   label: Text('Tambah'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
+                    backgroundColor: Color(0xFF56021F), // Warna tombol
                     foregroundColor: Colors.white,
                   ),
                 ),
                 ElevatedButton.icon(
                   onPressed: () => calculate(false),
-                  icon: Icon(Icons.remove),
+                  icon: Icon(Icons.remove, color: Colors.white),
                   label: Text('Kurang'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.redAccent,
+                    backgroundColor: Color(0xFF56021F), // Warna tombol
                     foregroundColor: Colors.white,
                   ),
                 ),
@@ -119,7 +121,7 @@ class _MathOperationsPageState extends State<MathOperationsPage> {
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF410038),
+                        color: Color(0xFF56021F), // Warna teks
                       ),
                     ),
                   ),
@@ -127,6 +129,32 @@ class _MathOperationsPageState extends State<MathOperationsPage> {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.decimalPattern('id_ID');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final int selectionIndexFromTheRight =
+        newValue.text.length - newValue.selection.end;
+    final String newString = _formatter.format(
+      int.parse(newValue.text.replaceAll('.', '')),
+    );
+    return TextEditingValue(
+      text: newString,
+      selection: TextSelection.collapsed(
+        offset: newString.length - selectionIndexFromTheRight,
       ),
     );
   }

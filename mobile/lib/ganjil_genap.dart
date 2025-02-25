@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
 class OddEvenInputPage extends StatefulWidget {
   const OddEvenInputPage({super.key});
@@ -12,13 +14,14 @@ class _OddEvenInputPageState extends State<OddEvenInputPage> {
   String message = '';
 
   void checkOddEven() {
-    int? num = int.tryParse(numberController.text);
+    String number = numberController.text.replaceAll('.', '');
+    int? num = int.tryParse(number);
     setState(() {
       if (num != null) {
         message =
             num % 2 == 0
-                ? 'Bilangan $num adalah **Genap** ✅'
-                : 'Bilangan $num adalah **Ganjil** 🔴';
+                ? 'Bilangan $num adalah GENAP'
+                : 'Bilangan $num adalah GANJIL';
       } else {
         message = '⚠️ Masukkan angka yang valid!';
       }
@@ -30,7 +33,8 @@ class _OddEvenInputPageState extends State<OddEvenInputPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Cek Bilangan Ganjil / Genap'),
-        backgroundColor: Colors.green,
+        backgroundColor: Color(0xFF56021F), // Warna app bar
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: EdgeInsets.all(20.0),
@@ -42,30 +46,29 @@ class _OddEvenInputPageState extends State<OddEvenInputPage> {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: Color(0xFF56021F),
               ),
             ),
             SizedBox(height: 10),
             TextField(
               controller: numberController,
               keyboardType: TextInputType.number,
+              inputFormatters: [ThousandsSeparatorInputFormatter()],
               decoration: InputDecoration(
                 labelText: 'Masukkan Angka',
                 floatingLabelBehavior: FloatingLabelBehavior.never,
                 border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.numbers),
-                filled: true,
-                fillColor: Color(0xFFFFC0EB),
+                prefixIcon: Icon(Icons.numbers, color: Color(0xFF56021F)),
               ),
             ),
             SizedBox(height: 20),
             Center(
               child: ElevatedButton.icon(
                 onPressed: checkOddEven,
-                icon: Icon(Icons.check),
+                icon: Icon(Icons.check, color: Colors.white),
                 label: Text('Cek Bilangan'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Color(0xFF56021F), // Warna tombol
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 ),
@@ -88,7 +91,7 @@ class _OddEvenInputPageState extends State<OddEvenInputPage> {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF410038),
+                        color: Color(0xFF56021F),
                       ),
                     ),
                   ),
@@ -96,6 +99,32 @@ class _OddEvenInputPageState extends State<OddEvenInputPage> {
               ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class ThousandsSeparatorInputFormatter extends TextInputFormatter {
+  final NumberFormat _formatter = NumberFormat.decimalPattern('id_ID');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty) {
+      return newValue.copyWith(text: '');
+    }
+
+    final int selectionIndexFromTheRight =
+        newValue.text.length - newValue.selection.end;
+    final String newString = _formatter.format(
+      int.parse(newValue.text.replaceAll('.', '')),
+    );
+    return TextEditingValue(
+      text: newString,
+      selection: TextSelection.collapsed(
+        offset: newString.length - selectionIndexFromTheRight,
       ),
     );
   }

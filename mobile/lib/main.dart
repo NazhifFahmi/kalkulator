@@ -14,15 +14,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Dart Flutter App',
       theme: ThemeData(
-        primarySwatch: Colors.purple,
-        scaffoldBackgroundColor: Color(0xFF410038),
+        primaryColor: Color(0xFF56021F), // Warna tombol
+        scaffoldBackgroundColor: Color(0xFFFFDFEF), // Warna latar belakang
         appBarTheme: AppBarTheme(
           backgroundColor: Color(0xFF410038),
           foregroundColor: Colors.white,
-        ),
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(color: Colors.white),
-          bodyMedium: TextStyle(color: Colors.white),
         ),
       ),
       home: LoginPage(),
